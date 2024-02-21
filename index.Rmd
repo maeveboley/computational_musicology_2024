@@ -1,0 +1,77 @@
+---
+title: "Computational Musicology"
+author: "Maeve Boley"
+date: "2024-02-21"
+output: 
+ flexdashboard::flex_dashboard:
+  storyboard: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(spotifyr)
+library(plotly)
+library(ggplot2)
+library(dplyr)
+```
+
+ 
+```
+
+
+```
+
+### Introduction
+
+This corpus will encompass the works of Simon and Garfunkel in addition to Paul Simon’s solo work in order to compare the two separate discographies. Paul Simon claims that throughout his time in Simon and Garfunkel the two artists had many creative differences that had to be compromised on however after Simon and Garfunkel parted ways Paul Simon went on to produce many albums of his own written work, now with full creative control. I am curious how these musical differences Paul Simon has alluded to will be measured by Spotify’s AI. Through using a computer to give us actual data about the works of Paul Simon and works of Simon and Garfunkel we can analyze the effect that Art Garfunkel had on the music produced as a band. One obvious difference I predict is a major change in timbre and volume between the two bodies of works as we are comparing two voices harmonizing in Simon and Garfunkel to a solo vocal of Paul Simon. In addition to this I expect timbre and duration will vary as instrumental solos and use of minor or uncommon keys and scales and rhythms were utilized more by Paul Simon in his solo career than as a duo. This being said tracks like “The Boxer”,”50 ways to lose a lover”,and “Somewhere They Cant Find Me” particularly interesting and useful to this analysis as these are fairly popular selections that I feel best represents the artists distinct musical styles. “Bridge Over Troubled Water” is reminiscent of Simon and Garfunkel styles and was a transition period for Paul Simon so comparing this piece of work to that of the duo’s should provide results heavily weighted on lack of harmonies rather than compositional style. In addition to this there will be other differences to account for as I plan for this corpus to be inclusive of as many different recordings of the artists performing their songs, including live recordings which will undoubtedly vary from their studio version matches.
+
+### Visualizations #1
+
+```{r, week1, echo=FALSE}
+PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
+SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
+
+FullCorpus1<- bind_rows(
+     SimonAndGarfunkel |> mutate(category = "Simon And Garfunkel"),
+     PaulSimon |> mutate(category = "Paul Simon")
+)
+
+
+FullCorpus1 |>
+      ggplot(aes(x = valence, y = energy, color = category, size = loudness)) +  geom_point() +   geom_jitter() + geom_smooth()
+
+```
+
+```{r , echo=FALSE}
+```
+
+***
+
+This scatterplot shows a representation of songs by the famous duo Simon and Garfunkel (shown in blue) compared to the solo work of Paul Simon (shown in red) in terms of valence (x-axsis), energy(y-axsis), and loudness(shown through size) as measured by Spotifys AI software. As predicted energy and valence have a positive coorelation regardless of artist similar to energys postive coorelation with loudness depicted on the chart. What I find interesting about this graph is that Paul Simons distribution seems fairly consistent while Simon and Garfunkel have more varation in loudness and energy. In addition I was suprised to see that there is a larger cluster of songs with lower valence in the Simon and Garfunkel songs than in Paul Simons. Generally speaking the highest levels of valence were achieved with energy levels of around 0.60-0.90.
+
+### Visualizations #2
+```{r, week1.1, echo=FALSE}
+PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
+SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
+
+FullCorpus1<- bind_rows(
+     SimonAndGarfunkel |> mutate(category = "Simon And Garfunkel"),
+     PaulSimon |> mutate(category = "Paul Simon")
+)
+
+FullCorpus1 |>
+     ggplot(aes(x = energy)) +
+     geom_histogram(binwidth = 0.1) +
+     facet_wrap(~category)
+
+```
+
+***
+
+This histogram broadly shows the amount of songs per each artist that match a certain level of energy in order to effectivly compare the energy levels of the two artists. 
+
+```{r , echo=FALSE}
+```
+### Conclusions
+
+This is where my general conclusions will appear once they have been made
