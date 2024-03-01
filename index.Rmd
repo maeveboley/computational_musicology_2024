@@ -13,19 +13,136 @@ library(spotifyr)
 library(plotly)
 library(ggplot2)
 library(dplyr)
+library(tidyverse)
+library(compmus)
 ```
 
  
+### New Tab 1
+
+```{r , echo=FALSE}
+Bridgesong <-
+     get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |>
+     select(segments) |>
+     unnest(segments) |>
+     select(start, duration, pitches)
+Bridgesong %>%
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) %>%
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
 ```
 
+***
 
+A represenation of the chromatic features of The 59th Bridge Street Song by Simon and Garfunkel. 
+
+### New Tab 2 
+```{r , echo=FALSE}
+Bridgesong <-
+  get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |> 
+  compmus_align(bars, segments) |>                    
+  select(bars) |>                                    
+  unnest(bars) |>                                    
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"            
+      )
+  ) |>
+  mutate(timbre = map(segments,compmus_summarise, timbre, method = "rms", norm = "euclidean"))
+
+Bridgesong |>
+  compmus_gather_timbre() |>
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
 ```
+
+### New Tab 3: Timbre SSM
+
+```{r , echo=FALSE}
+Bridgesong |>
+  compmus_self_similarity(timbre, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "BridgeSong", y = "BridgeSong")
+ 
+```
+
+***
+
+This is a self similarity matrice of Simon and Garfunkels hit, The 59th Bridge Street Song according to timbre. This song was chosen as to represnt a centerpoint. This shows a common theme of fade outs. In this graph it is hard to determine the amount of segments, particuarly towards the middle of the graph although I would say there are 4. 
+
+### New Tab 4: Pitches SSM
+
+```{r , echo=FALSE}
+
+Bridgesong <-
+     get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |>
+     select(segments) |>
+     unnest(segments) |>
+     select(start, duration, pitches)
+
+Bridgesong |>
+  compmus_self_similarity(pitches, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "Bridgesong", y = "Bridgesong")
+  
+```
+
+***
+
+This is a self-similarity matrix on Simon and Garfunkel's hit The 59th Street Bridge Song based on pitches. 
 
 ### Introduction
 
 This corpus will encompass the works of Simon and Garfunkel in addition to Paul Simon’s solo work in order to compare the two separate discographies. Paul Simon claims that throughout his time in Simon and Garfunkel the two artists had many creative differences that had to be compromised on however after Simon and Garfunkel parted ways Paul Simon went on to produce many albums of his own written work, now with full creative control. I am curious how these musical differences Paul Simon has alluded to will be measured by Spotify’s AI. Through using a computer to give us actual data about the works of Paul Simon and works of Simon and Garfunkel we can analyze the effect that Art Garfunkel had on the music produced as a band. One obvious difference I predict is a major change in timbre and volume between the two bodies of works as we are comparing two voices harmonizing in Simon and Garfunkel to a solo vocal of Paul Simon. In addition to this I expect timbre and duration will vary as instrumental solos and use of minor or uncommon keys and scales and rhythms were utilized more by Paul Simon in his solo career than as a duo. This being said tracks like “The Boxer”,”50 ways to lose a lover”,and “Somewhere They Cant Find Me” particularly interesting and useful to this analysis as these are fairly popular selections that I feel best represents the artists distinct musical styles. “Bridge Over Troubled Water” is reminiscent of Simon and Garfunkel styles and was a transition period for Paul Simon so comparing this piece of work to that of the duo’s should provide results heavily weighted on lack of harmonies rather than compositional style. In addition to this there will be other differences to account for as I plan for this corpus to be inclusive of as many different recordings of the artists performing their songs, including live recordings which will undoubtedly vary from their studio version matches.
 
-### Visualizations #1
+### Visualization #1: Scatterplot
 
 ```{r, week1, echo=FALSE}
 PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
@@ -49,7 +166,7 @@ FullCorpus1 |>
 
 This scatterplot shows a representation of songs by the famous duo Simon and Garfunkel (shown in blue) compared to the solo work of Paul Simon (shown in red) in terms of valence (x-axsis), energy(y-axsis), and loudness(shown through size) as measured by Spotifys AI software. As predicted energy and valence have a positive coorelation regardless of artist similar to energys postive coorelation with loudness depicted on the chart. What I find interesting about this graph is that Paul Simons distribution seems fairly consistent while Simon and Garfunkel have more varation in loudness and energy. In addition I was suprised to see that there is a larger cluster of songs with lower valence in the Simon and Garfunkel songs than in Paul Simons. Generally speaking the highest levels of valence were achieved with energy levels of around 0.60-0.90.
 
-### Visualizations #2
+### Visualization #2: Histogram
 ```{r, week1.1, echo=FALSE}
 PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
 SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
