@@ -53,9 +53,9 @@ FullCorpus1<- bind_rows(
 
 
 plot_a <- FullCorpus1 |>
-      ggplot(aes(x = valence, y = energy, color = category)) +  geom_point() +   geom_jitter() + geom_smooth() + labs(x = "Valence", y = "Energy", title = "Energy and Valence Scatterplot")
+      ggplot(aes(x = valence, y = energy, color = category, text = track.name)) +  geom_point() +   geom_jitter() + geom_smooth() + labs(x = "Valence", y = "Energy", title = "Energy and Valence Scatterplot")
 
-ggplotly(plot_a)
+plot_a <-ggplotly(plot_a)
 
 
 PaulSimonLast <- get_playlist_audio_features("","07cXmheJn34BFNvj9ZL2aT?si=ac471c8aa2584abf")
@@ -65,9 +65,9 @@ FirstandLast <- bind_rows(
   PaulSimonLast %>% mutate(category = "Paul Simon: In the Blue Light"))
 
 plot_b <-FirstandLast |>
-      ggplot(aes(x = valence, y = energy, color = category, size = loudness)) +  geom_point() +   geom_jitter() + geom_smooth() + labs(x = "Valence", y = "Energy", title = "Energy and Valence Scatterplot")
+      ggplot(aes(x = valence, y = energy, color = category, size = loudness, text = track.name)) +  geom_point() +   geom_jitter() + geom_smooth() + labs(x = "Valence", y = "Energy", title = "Energy and Valence Scatterplot")
 
-ggplotly(plot_b)
+plot_b <-ggplotly(plot_b)
 
 subplot(plot_a, plot_b, nrows = 2)
 
@@ -89,7 +89,7 @@ This scatterplot is set up the same as the prior however in this one I have sing
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/3PQQXqRozROVS6q2Db5vvY?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
 
-### Clustering 
+### Clustering a Corpus
 
 ```{r Dendrogram, echo=FALSE}
 PaulSimonLast <- get_playlist_audio_features("","07cXmheJn34BFNvj9ZL2aT?si=ac471c8aa2584abf")
@@ -156,13 +156,14 @@ FirstandLastDistance %>%
 ***
 
 **Dendrogram**
+
 This is a dendrogram attempting to make groups and connectons between the tracks on both Paul Simons latest album and Simon and Garfunkels first album in order to fully understand the contrast between the begining of their duo career and the end of Pauls solo career. Based off of this graph it is clear that ___. This information known, the question now is what makes these groups so different?
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/5pnJrocLlZ3FWEbcr2PTz0?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/3PQQXqRozROVS6q2Db5vvY?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
 
-### General Information; key and tempo
+### General Information; Tempo
 
 ```{r tempo_hist, echo=FALSE}
 
@@ -178,7 +179,71 @@ FullCorpus1 |>
   geom_histogram() +
   facet_wrap(~category) + labs(x = "Tempo", y = "Count", title = "Tempo Histograms Comparing Artists")
 ```
+***
 
+**Tempo Histograms Comparing Artists**
+This is a histogram showing the amount of songs played at certain tempos divided by group. The histogram of Paul Simon shows a generally centered distribution around 120bpm while Simon and Garfunkel is slightly more vaired, being skewed slightly more towards the right with the highest being just around 100bpm. Generally speaking from this histogram we can tell that paul simon has a tendancy to consistently write around 120bpm while the duo generally aimed around 100bpm. 
+
+### Tempo; Studying Outliers vs Average
+
+```{r , echo=FALSE}
+Benedictus <- get_tidy_audio_analysis("1w6tyJVF4LZunYX3ZtPgJd?si=aaca552cd922478c")
+
+Benedictus |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(title = "Benedictus by Simon and Garfunkel Tempogram", x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+  
+PigsSheepandWolves <- get_tidy_audio_analysis("46Slgg6qOASdxlwkhWLbSL?si=7c6f790f8b8d4dd6")
+
+PigsSheepandWolves |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(title = "Pigs, Sheep, and Wolves by Paul Simon Tempogram",x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+  
+SoundofSilence1 <- get_tidy_audio_analysis("5y788ya4NvwhBznoDIcXwK?si=552294d5192d44f4")
+
+SoundofSilence1 |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(title = "The Sound of Silence by Simon and Garfunkel Tempogram", x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+
+```
+
+***
+
+ **Benedictus by Simon and Garfunkel Tempogram**
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/6l8EbYRtQMgKOyc1gcDHF9?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+  
+ This song was chosen as an outlier for being the lowest in engergy, valence, and sound on the energy and valence scatterplot. The tempogram above shows a tempo of __. __steady or unsteady. 
+ 
+ **Pigs, Sheep, and Wolves by Paul Simon Tempogram**
+ 
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/46Slgg6qOASdxlwkhWLbSL?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+
+This song was chosen for its high levels of valence and energy which stands out above others on the energy and valence scatterplots. In the graph it should be noted that the tempo of __ could contribute to its high energy and emotion. __steady or unsteady. 
+ 
+ **The Sound of Silence by Simon and Garfunkel Tempogram**
+ 
+ <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/5y788ya4NvwhBznoDIcXwK?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+ 
+ This song was chosen because it is one of Simon and Garfunkels most popular songs and in the previous energy and valence graph acts as middle ground for the analysis. This tempogram specifically indicates a tempo of __. It also shows that _steady or unsteady. 
+
+**Generalizations**
+
+overall...
+
+### Keys
 ```{r key_hist, echo=FALSE}
 
 PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
@@ -194,110 +259,136 @@ FullCorpus1 |>
   facet_wrap(~category) + labs(x = "Key Name", y = "Count", title = "Key Historgrams Comparing Artists")
 ```
 
-
 ***
-
-**Tempo Histograms Comparing Artists**
-This is a histogram showing the amount of songs played at certain tempos divided by group. The histogram of Paul Simon shows a generally centered distribution around 120bpm while Simon and Garfunkel is slightly more vaired, being skewed slightly more towards the right with the highest being just around 100bpm. Generally speaking from this histogram we can tell that paul simon has a tendancy to consistently write around 120bpm while the duo generally aimed around 100bpm. 
 
 **Key Historgrams Comparing Artists**
 These keys histograms show a count of how many times each key was used in the corpus. These show that the two seperate groups are more alike than one might predict. Both groups have a tendancy towards keys G, D, E, and C. That being said G#, F, and A rank much higher with Paul Simon than Simon and Garfunkel. The large increase of the use of G#, A, and E, specifically from Simon and Garfunkels to Paul Simons work implies that these keys were favored by Paul Simon but not Art Garfunkel. 
 
-### Tempo; Studying Outliers vs Average
+
+### Chromagrams __. 
 
 ```{r , echo=FALSE}
-BOTW_SG <- get_tidy_audio_analysis("6l8EbYRtQMgKOyc1gcDHF9?si=4a8e48acfb2e4876")
+ 
+circshift <- function(v, n) {
+  if (n == 0) v else c(tail(v, n), head(v, -n))
+}
 
-BOTW_SG |>
-  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
+#      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B
+major_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
+minor_chord <-
+  c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0)
+seventh_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0)
+
+major_key <-
+  c(6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88)
+minor_key <-
+  c(6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17)
+
+chord_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:7", circshift(seventh_chord, 6),
+    "Gb:maj", circshift(major_chord, 6),
+    "Bb:min", circshift(minor_chord, 10),
+    "Db:maj", circshift(major_chord, 1),
+    "F:min", circshift(minor_chord, 5),
+    "Ab:7", circshift(seventh_chord, 8),
+    "Ab:maj", circshift(major_chord, 8),
+    "C:min", circshift(minor_chord, 0),
+    "Eb:7", circshift(seventh_chord, 3),
+    "Eb:maj", circshift(major_chord, 3),
+    "G:min", circshift(minor_chord, 7),
+    "Bb:7", circshift(seventh_chord, 10),
+    "Bb:maj", circshift(major_chord, 10),
+    "D:min", circshift(minor_chord, 2),
+    "F:7", circshift(seventh_chord, 5),
+    "F:maj", circshift(major_chord, 5),
+    "A:min", circshift(minor_chord, 9),
+    "C:7", circshift(seventh_chord, 0),
+    "C:maj", circshift(major_chord, 0),
+    "E:min", circshift(minor_chord, 4),
+    "G:7", circshift(seventh_chord, 7),
+    "G:maj", circshift(major_chord, 7),
+    "B:min", circshift(minor_chord, 11),
+    "D:7", circshift(seventh_chord, 2),
+    "D:maj", circshift(major_chord, 2),
+    "F#:min", circshift(minor_chord, 6),
+    "A:7", circshift(seventh_chord, 9),
+    "A:maj", circshift(major_chord, 9),
+    "C#:min", circshift(minor_chord, 1),
+    "E:7", circshift(seventh_chord, 4),
+    "E:maj", circshift(major_chord, 4),
+    "G#:min", circshift(minor_chord, 8),
+    "B:7", circshift(seventh_chord, 11),
+    "B:maj", circshift(major_chord, 11),
+    "D#:min", circshift(minor_chord, 3)
+  )
+
+key_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:maj", circshift(major_key, 6),
+    "Bb:min", circshift(minor_key, 10),
+    "Db:maj", circshift(major_key, 1),
+    "F:min", circshift(minor_key, 5),
+    "Ab:maj", circshift(major_key, 8),
+    "C:min", circshift(minor_key, 0),
+    "Eb:maj", circshift(major_key, 3),
+    "G:min", circshift(minor_key, 7),
+    "Bb:maj", circshift(major_key, 10),
+    "D:min", circshift(minor_key, 2),
+    "F:maj", circshift(major_key, 5),
+    "A:min", circshift(minor_key, 9),
+    "C:maj", circshift(major_key, 0),
+    "E:min", circshift(minor_key, 4),
+    "G:maj", circshift(major_key, 7),
+    "B:min", circshift(minor_key, 11),
+    "D:maj", circshift(major_key, 2),
+    "F#:min", circshift(minor_key, 6),
+    "A:maj", circshift(major_key, 9),
+    "C#:min", circshift(minor_key, 1),
+    "E:maj", circshift(major_key, 4),
+    "G#:min", circshift(minor_key, 8),
+    "B:maj", circshift(major_key, 11),
+    "D#:min", circshift(minor_key, 3)
+  )
+  
+ SoundofSilence2 <-
+  get_tidy_audio_analysis("5y788ya4NvwhBznoDIcXwK?si=552294d5192d44f4") |>
+  compmus_align(sections, segments) |>
+  select(sections) |>
+  unnest(sections) |>
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  ) 
+   
+SoundofSilence2 |> 
+  compmus_match_pitch_template(
+    key_templates, 
+    method = "euclidean",
+    norm = "manhattan"     
+  ) |>
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
   scale_fill_viridis_c(guide = "none") +
-  labs(title = "Bridge Over Troubled Waters by Simon and Garfunkel Tempogram", x = "Time (s)", y = "Tempo (BPM)") +
-  theme_classic()
-  
-Guitar3PS <- get_tidy_audio_analysis("12waNEMiB0sO6tqLQn4IBA?si=54a49558402d4175")
-
-Guitar3PS |>
-  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs(title = "Guitar Piece 3 by Paul Simon Tempogram",x = "Time (s)", y = "Tempo (BPM)") +
-  theme_classic()
-  
-ZooSG <- get_tidy_audio_analysis("0b1NUCAYfEOuPx9nELBBfX?si=4f8251bfb15c4974")
-
-ZooSG |>
-  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs(title = "At the Zoo by Simon and Garfunkel Tempogram", x = "Time (s)", y = "Tempo (BPM)") +
-  theme_classic()
-  
-```
-
-***
-
- **Tempograms**
- 
- These Tempograms are here to track how AI measures the tempo of a recording through least and most popular tracks in both artists discographies. 
- 
- **Bridge over Troubled Waters**
-
-<iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/6l8EbYRtQMgKOyc1gcDHF9?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-  
- talk about this
- 
- **Guitar Piece 3**
- 
- talk
- 
- **At The Zoo**
- 
- talk about this too
- 
-### Chroma Features
-
-### Loudness an Timbre
-
-```{r, week1, echo=FALSE}
-
-PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
-SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
-
-FullCorpus1<- bind_rows(
-     SimonAndGarfunkel |> mutate(category = "Simon And Garfunkel"),
-     PaulSimon |> mutate(category = "Paul Simon")
-)
-FullCorpus1 |>
-      ggplot(aes(x = acousticness, y = instrumentalness, color = category, size = track.popularity)) +  geom_point() +   geom_jitter() + geom_smooth() + labs(x = "Acousticness", y = "Instrumentalness", title = "Timbre vs Popularity Comparrison of Artists") 
-
-```
-
-
-### New Tab 1.1: Novelty Funct?
-```{r , echo=FALSE}
-TheBoxerSG <- 
-  get_tidy_audio_analysis("76TZCvJ8GitQ2FA1q5dKu0?si=04edfc2cfb7d406f") |>
-  select(segments) |>
-  unnest(segments)
-
-TheBoxerSG |>
-  mutate(loudness_max_time = start + loudness_max_time) |>
-  arrange(loudness_max_time) |>
-  mutate(delta_loudness = loudness_max - lag(loudness_max)) |>
-  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
-  geom_line() +
-  xlim(0, 30) +
   theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty")
-
+  labs(x = "Time (s)", y = "")
+  
+ 
 ```
 
-### New Tab 1.2: Tempogram, compared to Timbre SSMs, The Boxer
-```{r , echo=FALSE}
+### SSM: Timbre and Pitches The Boxer
+
+```{r , The Boxer 1, echo=FALSE}
+
 TheBoxerSG <- get_tidy_audio_analysis("76TZCvJ8GitQ2FA1q5dKu0?si=04edfc2cfb7d406f")
 
 TheBoxerSG |>
@@ -329,10 +420,62 @@ TheBoxerSG |>
   coord_fixed() +
   scale_fill_viridis_c(guide = "none") +
   theme_classic() +
-  labs(x = "theBoxerSG", y = "TheBoxerSG")
+  labs(x = "The Boxer Timbre", y = "The Boxer Timbre")
+
+TheBoxerSG <-
+     get_tidy_audio_analysis("76TZCvJ8GitQ2FA1q5dKu0?si=04edfc2cfb7d406f") |>
+     select(segments) |>
+     unnest(segments) |>
+     select(start, duration, pitches)
+
+TheBoxerSG |>
+  compmus_self_similarity(pitches, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "The Boxer Pitches", y = "The Boxer Pitches")
+
+
+```
+
+
+```{r , The Boxer 2, echo=FALSE}
 
 TheBoxerSGLive <-
-     get_tidy_audio_analysis("0Fj8qJmcmec4IOvBmGISnF?si=c21b9f7aecf545ef") |>
+     get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |>
+     select(segments) |>
+     unnest(segments) |>
+     select(start, duration, pitches)
+
+TheBoxerSGLive |>
+  compmus_self_similarity(pitches, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "The Boxer Live S + G Pitches", y = "The Boxer Live S + G Pitches")
+  
+  TheBoxerSGLive <-
+     get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |>
      select(segments) |>
      unnest(segments) |>
      select(start, duration, timbre)
@@ -352,7 +495,35 @@ TheBoxerSGLive |>
   coord_fixed() +
   scale_fill_viridis_c(guide = "none") +
   theme_classic() +
-  labs(x = "theBoxerSGLive", y = "TheBoxerSGLive")
+  labs(x = "The Boxer Live S + G, Timbre", y = "The Boxer Live S + G, Timbre")
+
+  
+```
+
+```{r , The Boxer 3, echo=FALSE}
+
+TheBoxerPLive <-
+     get_tidy_audio_analysis("3MUHmdHaQSQ79hnmJRk5uk?si=83c1ea1aba204524") |>
+     select(segments) |>
+     unnest(segments) |>
+     select(start, duration, pitches)
+
+TheBoxerPLive |>
+  compmus_self_similarity(pitches, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "The Boxer Live Paul Pitches", y = "The Boxer Live Paul Pitches")
 
 TheBoxerPLive <-
      get_tidy_audio_analysis("3MUHmdHaQSQ79hnmJRk5uk?si=83c1ea1aba204524") |>
@@ -375,13 +546,101 @@ TheBoxerPLive |>
   coord_fixed() +
   scale_fill_viridis_c(guide = "none") +
   theme_classic() +
-  labs(x = "theBoxerPLive", y = "TheBoxerPLive")
+  labs(x = "The Boxer Live Paul Timbre", y = "The Boxer Live Paul Timbre")
 
 
 ```
 ***
 
-This page contains a tempogram of the offical recording of the Boxer, by Simon and Garfunkel as well as three different Self Similarity Matrix of different versions of the song, one live by Simon and Garfunkel and one live recording by Paul Simon alone. analysis____. 
+**Findings**
+
+This page contains a tempogram of the offical recording of the Boxer, by Simon and Garfunkel as well as three different Self Similarity Matrix of different versions of the song, the origonal recording, a live recording by Simon and Garfunkel and a live recording by Paul Simon alone. analysis__. 
+
+### timbre and loudness
+
+```{r, week1, echo=FALSE}
+
+PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
+SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
+
+FullCorpus1<- bind_rows(
+     SimonAndGarfunkel |> mutate(category = "Simon And Garfunkel"),
+     PaulSimon |> mutate(category = "Paul Simon")
+)
+FullCorpus1 |>
+      ggplot(aes(x = acousticness, y = instrumentalness, color = category, size = track.popularity)) +  geom_point() +   geom_jitter() + geom_smooth() + labs(x = "Acousticness", y = "Instrumentalness", title = "Timbre vs Popularity Comparrison of Artists") 
+
+```
+
+
+
+
+
+### Tab 1: Chromagram
+
+```{r , echo=FALSE}
+Bridgesong <-
+     get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |>
+     select(segments) |>
+     unnest(segments) |>
+     select(start, duration, pitches)
+Bridgesong %>%
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) %>%
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
+
+***
+
+A represenation of the chromatic features of The 59th Bridge Street Song by Simon and Garfunkel. 
+
+### chroma related
+```{r , echo=FALSE}
+Bridgesong <-
+  get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |> 
+  compmus_align(bars, segments) |>                    
+  select(bars) |>                                    
+  unnest(bars) |>                                    
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "euclidean"            
+      )
+  ) |>
+  mutate(timbre = map(segments,compmus_summarise, timbre, method = "rms", norm = "euclidean"))
+
+Bridgesong |>
+  compmus_gather_timbre() |>
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+```
+
+***
+no analysis yet...
+
+
 
 ### New Tab 3: Variation Plot
 
@@ -418,15 +677,157 @@ FullCorpus1 |>
 ```
 
 ***
+an explanation
 
-Im not fully sure what to say about this yet however I am interested in the extreme outliers in this data set and in turn I hope to be able to make some type of connection explaining why they are all Simon and Garfunkel tracks. For this reason I feel I need to label outliers on this graph. I hope to be able to make better sense of the standard deviation component because I dont fully understand!
 
 
-### New Tab 1: Chordogram
-
+### New Tab 1.1: Novelty Funct?
 ```{r , echo=FALSE}
+TheBoxerSG <- 
+  get_tidy_audio_analysis("76TZCvJ8GitQ2FA1q5dKu0?si=04edfc2cfb7d406f") |>
+  select(segments) |>
+  unnest(segments)
+
+TheBoxerSG |>
+  mutate(loudness_max_time = start + loudness_max_time) |>
+  arrange(loudness_max_time) |>
+  mutate(delta_loudness = loudness_max - lag(loudness_max)) |>
+  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
+  geom_line() +
+  xlim(0, 30) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty")
+
+```
+
+### Conclusions
+
+This is where my general conclusions will appear once they have been made
+
+
+### Just Messing around
+
+```{r, energy and valence first and last}
+PaulSimonLast <- get_playlist_audio_features("","07cXmheJn34BFNvj9ZL2aT?si=ac471c8aa2584abf")
+SimonAndGarfunkelFirst <-get_playlist_audio_features("","249Dhfeva3JzUDeArGoB4y?si=e10d5edc56ce4e98")
+FirstandLast <- bind_rows(
+  SimonAndGarfunkelFirst %>% mutate(category = "Simon And Garfunkel: Wednesday Morning, 3AM."),
+  PaulSimonLast %>% mutate(category = "Paul Simon: In the Blue Light"))
+
+plot_b <-FirstandLast |>
+      ggplot(aes(x = valence, y = energy, color = category, size = loudness, text = track.name)) +  geom_point() +   geom_jitter() + labs(x = "Valence", y = "Energy", title = "Energy and Valence Scatterplot")
+
+plot_b <-ggplotly(plot_b)
+subplot(plot_b)
+
+```
+
+### OLD Code
+```{r}
+PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
+SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
+
+FullCorpus1<- bind_rows(
+     SimonAndGarfunkel |> mutate(category = "Simon And Garfunkel"),
+     PaulSimon |> mutate(category = "Paul Simon")
+)
+
+FullCorpus1 |>
+     ggplot(aes(x = danceability)) +
+     geom_histogram(binwidth = 0.1) +
+     facet_wrap(~category) + labs(x = "Dance-ability",  y = "Count", title = "Histogram of Dance-ability") 
+```
+
+```{r old_tempograms, echo=FALSE}
+BOTW_SG <- get_tidy_audio_analysis("6l8EbYRtQMgKOyc1gcDHF9?si=4a8e48acfb2e4876")
+
+BOTW_SG |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(title = "Bridge Over Troubled Waters by Simon and Garfunkel Tempogram", x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+  
+Guitar3PS <- get_tidy_audio_analysis("12waNEMiB0sO6tqLQn4IBA?si=54a49558402d4175")
+
+Guitar3PS |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(title = "Guitar Piece 3 by Paul Simon Tempogram",x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+  
+ZooSG <- get_tidy_audio_analysis("0b1NUCAYfEOuPx9nELBBfX?si=4f8251bfb15c4974")
+
+ZooSG |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(title = "At the Zoo by Simon and Garfunkel Tempogram", x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+  
+```
+
+```{r pitches ssm, echo=FALSE}
+
+Bridgesong <-
+     get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |>
+     select(segments) |>
+     unnest(segments) |>
+     select(start, duration, pitches)
+
+Bridgesong |>
+  compmus_self_similarity(pitches, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "Bridgesong", y = "Bridgesong")
+  
+```
+
+
+```{r timbre ssm, echo=FALSE}
+
+Bridgesong <-
+     get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |>
+     select(segments) |>
+     unnest(segments) |>
+     select(start, duration, timbre)
+
+Bridgesong |>
+  compmus_self_similarity(timbre, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "BridgeSong", y = "BridgeSong")
  
- circshift <- function(v, n) {
+```
+```{r chordogram , echo=FALSE}
+ 
+circshift <- function(v, n) {
   if (n == 0) v else c(tail(v, n), head(v, -n))
 }
 
@@ -542,163 +943,16 @@ Insomniacs_Lullaby |>
  
 ```
 
+
 ***
 
 From this chordogram I would argue that majority of this track is in G major or or E minor. This is a very popular key amongst Paul Simons work. Additionally there is light green line in near the middle, and even brigter near the end where there are not only rests in the guitar and voice parts but also indicating another type of noise, perhaps computorized. This being said I will need to do further analysis when I better grasp the concept...
-
-
-### Tab 1: Chromagram
-
-```{r , echo=FALSE}
-Bridgesong <-
-     get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |>
-     select(segments) |>
-     unnest(segments) |>
-     select(start, duration, pitches)
-Bridgesong %>%
-  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) %>%
-  compmus_gather_chroma() |> 
-  ggplot(
-    aes(
-      x = start + duration / 2,
-      width = duration,
-      y = pitch_class,
-      fill = value
-    )
-  ) +
-  geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
-  theme_minimal() +
-  scale_fill_viridis_c()
-```
-
-***
-
-A represenation of the chromatic features of The 59th Bridge Street Song by Simon and Garfunkel. 
-
-### Tab 2 
-```{r , echo=FALSE}
-Bridgesong <-
-  get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |> 
-  compmus_align(bars, segments) |>                    
-  select(bars) |>                                    
-  unnest(bars) |>                                    
-  mutate(
-    pitches =
-      map(segments,
-        compmus_summarise, pitches,
-        method = "rms", norm = "euclidean"            
-      )
-  ) |>
-  mutate(timbre = map(segments,compmus_summarise, timbre, method = "rms", norm = "euclidean"))
-
-Bridgesong |>
-  compmus_gather_timbre() |>
-  ggplot(
-    aes(
-      x = start + duration / 2,
-      width = duration,
-      y = basis,
-      fill = value
-    )
-  ) +
-  geom_tile() +
-  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
-  scale_fill_viridis_c() +                              
-  theme_classic()
-```
-
-***
-no analysis yet...
-
-### Tab 3: Timbre SSM
-
-```{r , echo=FALSE}
-
-Bridgesong <-
-     get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |>
-     select(segments) |>
-     unnest(segments) |>
-     select(start, duration, timbre)
-
-Bridgesong |>
-  compmus_self_similarity(timbre, "cosine") |> 
-  ggplot(
-    aes(
-      x = xstart + xduration / 2,
-      width = xduration,
-      y = ystart + yduration / 2,
-      height = yduration,
-      fill = d
-    )
-  ) +
-  geom_tile() +
-  coord_fixed() +
-  scale_fill_viridis_c(guide = "none") +
-  theme_classic() +
-  labs(x = "BridgeSong", y = "BridgeSong")
- 
-```
-
 ***
 
 This is a self similarity matrice of Simon and Garfunkels hit, The 59th Bridge Street Song according to timbre. This song was chosen as to represnt a centerpoint. This shows a common theme of fade outs. In this graph it is hard to determine the amount of segments, particuarly towards the middle of the graph although I would say there are 4. 
 
-### Tab 4: Pitches SSM
 
-```{r , echo=FALSE}
-
-Bridgesong <-
-     get_tidy_audio_analysis("0eGl5p2TAYt76pqjEvQPa2?si=4183b29e05264ea3") |>
-     select(segments) |>
-     unnest(segments) |>
-     select(start, duration, pitches)
-
-Bridgesong |>
-  compmus_self_similarity(pitches, "cosine") |> 
-  ggplot(
-    aes(
-      x = xstart + xduration / 2,
-      width = xduration,
-      y = ystart + yduration / 2,
-      height = yduration,
-      fill = d
-    )
-  ) +
-  geom_tile() +
-  coord_fixed() +
-  scale_fill_viridis_c(guide = "none") +
-  theme_classic() +
-  labs(x = "Bridgesong", y = "Bridgesong")
-  
-```
 
 ***
 
 This is a self-similarity matrix on Simon and Garfunkel's hit The 59th Street Bridge Song based on pitches. 
-
-
-### Conclusions
-
-This is where my general conclusions will appear once they have been made
-
-
-### Just Messing around
-
-
-
-### Trash Code
-```{r}
-PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
-SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
-
-FullCorpus1<- bind_rows(
-     SimonAndGarfunkel |> mutate(category = "Simon And Garfunkel"),
-     PaulSimon |> mutate(category = "Paul Simon")
-)
-
-FullCorpus1 |>
-     ggplot(aes(x = danceability)) +
-     geom_histogram(binwidth = 0.1) +
-     facet_wrap(~category) + labs(x = "Dance-ability",  y = "Count", title = "Histogram of Dance-ability") 
-```
