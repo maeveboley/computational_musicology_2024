@@ -5,11 +5,14 @@ date: "2024-02-21"
 output: 
  flexdashboard::flex_dashboard:
   storyboard: true
-  theme: cosmo
+  theme:
+      version: 4
+      bootswatch: minty
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(cowplot)
 library(spotifyr)
 library(plotly)
 library(ggplot2)
@@ -38,23 +41,7 @@ This corpus will encompass the works of Simon and Garfunkel in addition to Paul 
 
 ### Overview of Track-Level Features
 
-```{r, plot1, echo=FALSE}
-
-PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
-SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
-
-FullCorpus1<- bind_rows(
-     SimonAndGarfunkel |> mutate(category = "Simon And Garfunkel"),
-     PaulSimon |> mutate(category = "Paul Simon"))
-
- plot_a <-FullCorpus1 %>%
-      ggplot(aes(x = valence, y = energy, color = category, size = loudness)) +  geom_point() +   geom_jitter() + geom_smooth() + labs(x = "Valence", y = "Energy", title = "Energy and Valence Scatterplot")
-
-ggplotly(plot_a)
-
-```
-
-```{r, plot2, echo=FALSE}
+```{r , echo=FALSE}
 
 PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
 SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
@@ -71,33 +58,40 @@ plot_a <- FullCorpus1 |>
 ggplotly(plot_a)
 
 
-PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
-SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
+PaulSimonLast <- get_playlist_audio_features("","07cXmheJn34BFNvj9ZL2aT?si=ac471c8aa2584abf")
+SimonAndGarfunkelFirst <-get_playlist_audio_features("","249Dhfeva3JzUDeArGoB4y?si=e10d5edc56ce4e98")
+FirstandLast <- bind_rows(
+  SimonAndGarfunkelFirst %>% mutate(category = "Simon And Garfunkel: Wednesday Morning, 3AM."),
+  PaulSimonLast %>% mutate(category = "Paul Simon: In the Blue Light"))
 
-FullCorpus1<- bind_rows(
-     SimonAndGarfunkel |> mutate(category = "Simon And Garfunkel"),
-     PaulSimon |> mutate(category = "Paul Simon")
-)
+plot_b <-FirstandLast |>
+      ggplot(aes(x = valence, y = energy, color = category, size = loudness)) +  geom_point() +   geom_jitter() + geom_smooth() + labs(x = "Valence", y = "Energy", title = "Energy and Valence Scatterplot")
 
-FullCorpus1 |>
-     ggplot(aes(x = danceability)) +
-     geom_histogram(binwidth = 0.1) +
-     facet_wrap(~category) + labs(x = "Dance-ability",  y = "Count", title = "Histogram of Dance-ability") 
+ggplotly(plot_b)
+
+subplot(plot_a, plot_b, nrows = 2)
 
 ```
 
 ***
 
-**Energy and Valence Scatterplot**
+**Full Corpus - Energy and Valence Scatterplot**
 
 This scatterplot shows a representation of songs by the famous duo Simon and Garfunkel (shown in blue) compared to the solo work of Paul Simon (shown in red) in terms of valence (x-axsis), energy(y-axsis), and loudness(shown through size) as measured by Spotifys AI software. As predicted energy and valence have a positive coorelation regardless of artist similar to energys postive coorelation with loudness depicted on the chart. What I find interesting about this graph is that Paul Simons distribution seems fairly consistent while Simon and Garfunkel have more varation in loudness and energy. In addition I was suprised to see that there is a larger cluster of songs with lower valence in the Simon and Garfunkel songs than in Paul Simons. Generally speaking the highest levels of valence were achieved with energy levels of around 0.60-0.90.
 
-**Histogram of Dance-ability**
+('<iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/4eK7MyztwdP3HrxI8X3eZ0?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>')
 
-This histogram shows how danceable the two artists discography actually are. 
+**Begining to End - Energy and Valence Scatterplot**
+
+This scatterplot is set up the same as the prior however in this one I have singled out the first Simon and Garfunkel album and thwe last Paul Simon album in order to see less clutter and the most contrast. From this plot we can see that there is a larger variation ___. 
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/5pnJrocLlZ3FWEbcr2PTz0?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+
+<iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/3PQQXqRozROVS6q2Db5vvY?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
 
 ### Clustering 
-```{r, echo=FALSE}
+
+```{r Dendrogram, echo=FALSE}
 PaulSimonLast <- get_playlist_audio_features("","07cXmheJn34BFNvj9ZL2aT?si=ac471c8aa2584abf")
 SimonAndGarfunkelFirst <- get_playlist_audio_features("","249Dhfeva3JzUDeArGoB4y?si=e10d5edc56ce4e98")
 
@@ -152,7 +146,7 @@ Recipe1 <- recipe(
 
 FirstandLastDistance <- dist(Recipe1, method = 'euclidean')
 
-dendro<- FirstandLastDistance %>%
+FirstandLastDistance %>%
   hclust(method = "average") %>%
   dendro_data() %>%
   ggdendrogram()
@@ -162,14 +156,16 @@ dendro<- FirstandLastDistance %>%
 ***
 
 **Dendrogram**
-This is a dendrogram attempting to make groups and connectons between the tracks on both Paul Simons latest album and Simon and Garfunkels first album in order to fully understand the contrast between the begining of their duo career and the end of Pauls solo career. Based off of this graph it is clear that ___. 
+This is a dendrogram attempting to make groups and connectons between the tracks on both Paul Simons latest album and Simon and Garfunkels first album in order to fully understand the contrast between the begining of their duo career and the end of Pauls solo career. Based off of this graph it is clear that ___. This information known, the question now is what makes these groups so different?
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/5pnJrocLlZ3FWEbcr2PTz0?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/album/3PQQXqRozROVS6q2Db5vvY?utm_source=generator" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
 
 ### General Information; key and tempo
-```{r , echo=FALSE}
+
+```{r tempo_hist, echo=FALSE}
+
 PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
 SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
 
@@ -181,7 +177,9 @@ FullCorpus1 |>
   ggplot(aes(x = tempo, fill = category)) +
   geom_histogram() +
   facet_wrap(~category) + labs(x = "Tempo", y = "Count", title = "Tempo Histograms Comparing Artists")
+```
 
+```{r key_hist, echo=FALSE}
 
 PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
 SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
@@ -194,8 +192,8 @@ FullCorpus1 |>
   ggplot(aes(x = key_name, fill = category)) +
   geom_bar() +
   facet_wrap(~category) + labs(x = "Key Name", y = "Count", title = "Key Historgrams Comparing Artists")
-
 ```
+
 
 ***
 
@@ -687,12 +685,20 @@ This is where my general conclusions will appear once they have been made
 
 ### Just Messing around
 
+
+
+### Trash Code
 ```{r}
-library(plotly)
-library(ggplot2)
-plot_a <-FirstandLast |>
-      ggplot(aes(x = valence, y = energy, color = category, size = loudness)) +  geom_point() +   geom_jitter() + geom_smooth() + labs(x = "Valence", y = "Energy", title = "Energy and Valence Scatterplot")
+PaulSimon<- get_playlist_audio_features("","2WzHYvLkaCRZDjsB04UfSE")
+SimonAndGarfunkel<-get_playlist_audio_features("","22geZ3piYiEEYuvRoZ51op")
 
-ggplotly(plot_a)
+FullCorpus1<- bind_rows(
+     SimonAndGarfunkel |> mutate(category = "Simon And Garfunkel"),
+     PaulSimon |> mutate(category = "Paul Simon")
+)
 
+FullCorpus1 |>
+     ggplot(aes(x = danceability)) +
+     geom_histogram(binwidth = 0.1) +
+     facet_wrap(~category) + labs(x = "Dance-ability",  y = "Count", title = "Histogram of Dance-ability") 
 ```
